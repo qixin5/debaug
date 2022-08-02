@@ -1,0 +1,14 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+test_file=$1               #Test script
+progname=$2
+afl_fuzzed_input_file=$3   #E.g., flex-2.5.4/aflfuzz/fuzz_byfile/1m/p0.1train/47/afl-out/crashes/XXX
+input_fname=$4             #in.0
+outid=$5                   #Id for program's output
+rslt_file=$6               #File to save this result
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.AFLFuzzedScriptGen ${test_file} ${progname} ${afl_fuzzed_input_file} ${input_fname} ${outid} ${rslt_file}
+
+

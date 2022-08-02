@@ -1,0 +1,12 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+fuzzidpath=$1
+fuzzsdpath=$2
+fuzznum=$3
+progname=$4
+fuzzedtestscriptgenerator_srcfpath=$5
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.CompileScriptGeneratorForFuzzedTestScriptGenerator ${fuzzidpath} ${fuzzsdpath} ${fuzznum} ${progname} ${fuzzedtestscriptgenerator_srcfpath}
+

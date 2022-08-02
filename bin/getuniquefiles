@@ -1,0 +1,8 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+spectra_dir=$1
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.GetUniqueFiles ${spectra_dir}
+

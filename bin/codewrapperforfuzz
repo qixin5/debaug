@@ -1,0 +1,10 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+progname=$1
+inputcodef=$2
+outputcodef=$3
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.CodeWrapperForFuzz ${progname} ${inputcodef} ${outputcodef}
+

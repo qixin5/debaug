@@ -1,0 +1,10 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+score_file=$1 #The score file (e.g., func/rank/rprfreqflex/I0_cov/rslt.txt)
+select_type=$2 #score or percent
+select_value=$3 #score (an integer as the real score * 100) or percentage (an integer)
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.FunctionSelecter ${score_file} ${select_type} ${select_value}
+

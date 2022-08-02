@@ -1,0 +1,10 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+llvm_gcov_binary_file=$1 #Binary-count version of the .gcov file (from llvm-cov)
+gcov_count_file=$2       #.gcov file generated from gcov -i SOURCE
+
+#NOTE: the first file will be updated!
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.LLVMGCovFixer ${llvm_gcov_binary_file} ${gcov_count_file}
+

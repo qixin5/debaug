@@ -1,0 +1,11 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+torun_script_file=$1 #A file containing the names of scripts to run
+output_script_dir=$2 #Directory saving the output script files
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.ScheduleTestGen ${torun_script_file} ${output_script_dir}
+
+chmod 700 ${output_script_dir}/*
+

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+test_file=$1 #Test script
+progname=$2
+fuzzdir=$3   #E.g., flex-2.5.4/aflfuzz/fuzz_byfile/1m/p0.1train
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.AFLScriptGen ${test_file} ${progname} ${fuzzdir}
+
+

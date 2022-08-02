@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/*:${rootdir}/lib/java/jgrapht-1.4.0/* edu.gatech.cc.debaug.GetPRForUniq
+

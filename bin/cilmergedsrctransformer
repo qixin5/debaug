@@ -1,0 +1,9 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+srcf=$1 #Original CIL-merged code
+linef=$2 #line.txt for the original code
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.CILMergedSrcTransformer ${srcf} ${linef}
+

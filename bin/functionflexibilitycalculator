@@ -1,0 +1,9 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+linef=$1 #line.txt
+gcovd=$2 #The gcov dir containing gcov files (e.g., gcov/I0_cov)
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.FunctionFlexibilityCalculator ${linef} ${gcovd}
+

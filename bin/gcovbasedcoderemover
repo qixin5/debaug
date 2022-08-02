@@ -1,0 +1,10 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+
+codef=$1 #Source code
+linef=$2 #line-printer result file
+gcovf=$3 #gcov -i result
+
+java -cp :${rootdir}/build/java:${rootdir}/lib/java/* edu.gatech.cc.debaug.GCovBasedCodeRemover ${codef} ${linef} ${gcovf}
+

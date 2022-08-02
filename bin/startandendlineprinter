@@ -1,0 +1,8 @@
+#!/bin/bash
+
+rootdir=${DEBAUG_DIR} 
+PRINTERBIN=${rootdir}/build/bin/instrumenter
+
+srcf=$1
+
+$PRINTERBIN -g statement test.sh ${srcf}
