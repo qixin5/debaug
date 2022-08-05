@@ -18,6 +18,10 @@ Before installing the debloating tools, please first make sure the following sof
 
 ### Build
 
+#### Quick Build
+
+For a quick build, you will download pre-built C binaries and compile the Java code. Run the shell commands below.
+
 ```
 git clone https://github.com/qixin5/debaug
 cd debaug
@@ -28,6 +32,24 @@ Make sure that DEBAUG_DIR has the correct value.
 ```
 export DEBAUG_DIR=[debaug directory]
 ```
+
+#### Complete Build
+
+For a complete build, you will build the C binaries and compile the Java code. Run the shell commands below.
+
+```
+git clone https://github.com/qixin5/debaug
+cd debaug
+./setup_full.sh
+```
+
+Make sure that DEBAUG_DIR has the correct value.
+```
+export DEBAUG_DIR=[debaug directory]
+```
+
+**Note**: Because a complete build requires building LLVM from source code, it can take a few hours!
+
 
 ## Quick Example
 
@@ -52,6 +74,8 @@ int main(int argc , char **argv)
   }
 }
 ```
+
+**Note**: If you did a quick build and saw a core dump raised from the execution of `startandendlineprinter`, do a complete build instead.
 
 ## Usage
 
