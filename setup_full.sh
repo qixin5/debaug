@@ -13,11 +13,11 @@ if [ ! -d llvm-project ]; then
     cd build
     cmake -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;llvm' ../llvm
     make -j 4
-
-    export PATH="${CURRDIR}/llvm-project/build/bin:${PATH}"
     
 fi
 
+
+export PATH="${CURRDIR}/llvm-project/build/bin:${PATH}"
 
 echo "Build instrumenter"
 cd $CURRDIR
