@@ -11,7 +11,7 @@ if [ ! -d llvm-project ]; then
     git checkout d8b01111
     mkdir build
     cd build
-    cmake -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;llvm' ../llvm
+    cmake -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;llvm' -DLLVM_ENABLE_RTTI='true' ../llvm
     make -j 4
     
 fi
