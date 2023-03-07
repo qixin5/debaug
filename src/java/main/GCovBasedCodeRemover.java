@@ -56,6 +56,7 @@ public class GCovBasedCodeRemover
     public static String getRemovedString(File codef, File linef,
 					  Map<Integer,Long> lcmap,
 					  Map<Integer,String> iflnmap) {
+
 	Map<Integer, Integer> ffs_map = LineFileParser.getStartEndLineMap(linef, "function");
 	Map<Integer, Integer> sfs_map = LineFileParser.getStartEndLineMap(linef, "statement");
 	Map<Integer, String> spfs_map = LineFileParser.getStartPropertyLineMap(linef, "statement"); //Starting line -> stmt type
@@ -99,28 +100,40 @@ public class GCovBasedCodeRemover
 			    break;
 			}
 		    }
-		    
+
 		    if (start != -1) {
 			for (int k=i; k<start; k++) { //Add lines up to the function-body line
 			    rslt_lines.add(codef_lines.get(k-1));
 			    preserved_line_nos.add(k);
 			}
 
-			//For start line, add content up to "{"
-			String start_line = codef_lines.get(start-1);
-			rslt_lines.add(start_line.substring(0, start_line.indexOf("{")+1));
-			preserved_line_nos.add(start);
+			if (start == end) {
 
-			//Add "" for function-body lines
-			for (int k=start+1; k<end; k++) {
-			    rslt_lines.add("");
+			    //Delete content between "{" and "}", and use the new line as result
+			    String target_line = codef_lines.get(start-1);
+			    String prefix = target_line.substring(0, target_line.indexOf("{")+1);
+			    String suffix = target_line.substring(target_line.indexOf("}"));
+			    rslt_lines.add(prefix + "" + suffix);
+
+			    //The method body (in one line) is essentially not preserved, so preserved_line_nos is not updated
 			}
+			else {
 
-			//For end line, add content from "}" to line-end
-			String end_line = codef_lines.get(end-1);
-			rslt_lines.add(end_line.substring(end_line.indexOf("}")));
-			preserved_line_nos.add(end);
-
+			    //For start line, add content up to "{"
+			    String start_line = codef_lines.get(start-1);
+			    rslt_lines.add(start_line.substring(0, start_line.indexOf("{")+1));
+			    preserved_line_nos.add(start);
+			    
+			    //Add "" for function-body lines
+			    for (int k=start+1; k<end; k++) {
+				rslt_lines.add("");
+			    }
+			    
+			    //For end line, add content from "}" to line-end
+			    String end_line = codef_lines.get(end-1);
+			    rslt_lines.add(end_line.substring(end_line.indexOf("}")));
+			    preserved_line_nos.add(end);
+			}
 			//Reset i
 			i = end;
 		    }
@@ -173,22 +186,34 @@ public class GCovBasedCodeRemover
 			}
 
 			//For full removal
-			for (int k=i; k<=j; k++) {
-			    if (k == i) { //Removed code from "{" to line-end
-				String oldline = codef_lines.get(k-1);
-				rslt_lines.add(oldline.substring(0, oldline.indexOf("{")+1));
-				preserved_line_nos.add(k);
-			    } 
-			    else if (k == j) { //Removed code up to "}"
-				String oldline = codef_lines.get(k-1);
-				rslt_lines.add(oldline.substring(oldline.indexOf("}")));
-				preserved_line_nos.add(k);
-			    } 
-			    else { //Removed line
-				rslt_lines.add("");
-			    }
+			if (i == j) {
+
+			    //Delete content between "{" and "}", and use the new line as result
+			    String target_line = codef_lines.get(i-1);
+			    String prefix = target_line.substring(0, target_line.indexOf("{")+1);
+			    String suffix = target_line.substring(target_line.indexOf("}"));
+			    rslt_lines.add(prefix + "" + suffix);
+			    
+			    //The method body (in one line) is essentially not preserved, so preserved_line_nos is not updated
 			}
-			i = j; //Move cursor to the end of the function
+			else {
+			    for (int k=i; k<=j; k++) {
+				if (k == i) { //Removed code from "{" to line-end
+				    String oldline = codef_lines.get(k-1);
+				    rslt_lines.add(oldline.substring(0, oldline.indexOf("{")+1));
+				    preserved_line_nos.add(k);
+				} 
+				else if (k == j) { //Removed code up to "}"
+				    String oldline = codef_lines.get(k-1);
+				    rslt_lines.add(oldline.substring(oldline.indexOf("}")));
+				    preserved_line_nos.add(k);
+				} 
+				else { //Removed line
+				    rslt_lines.add("");
+				}
+			    }
+			    i = j; //Move cursor to the end of the function
+			}
 		    }
 		    else {
 			rslt_lines.add(codef_lines.get(i-1));
@@ -246,7 +271,6 @@ public class GCovBasedCodeRemover
 	    }
 	}
 
-
 	//Add back possibly missing ending lines for functions and statements having children
 	//In the following example,
 	//5: if (0) {
@@ -264,7 +288,9 @@ public class GCovBasedCodeRemover
 		    end = sfs_map.get(i);
 		}
 		if (end != -1 && end != i) {
-		    rslt_lines.set(end-1, codef_lines.get(end-1));
+		    if ("".equals(rslt_lines.get(end-1))) {
+			rslt_lines.set(end-1, codef_lines.get(end-1));
+		    }
 		}
 	    }
 	}
@@ -272,9 +298,6 @@ public class GCovBasedCodeRemover
 	//Restore inconsistent functions as its original full version
 	for (Integer sln_key : iflnmap.keySet()) {
 	    int sln = sln_key.intValue();
-	    //===============
-	    //System.err.println("Starting line: " + sln);
-	    //===============	    
 	    int eln = -1;
 	    if (ffs_map.get(sln) != null) {
 		eln = ffs_map.get(sln).intValue();
