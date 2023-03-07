@@ -70,6 +70,8 @@ public class GCovBasedCodeRemover
 
 	//Either adding the original line or an empty line
 	//For label stmt line, insert ";" at the end (compiling error otherwise)
+	Set<Integer> preserved_line_nos = new HashSet<Integer>();
+	    
 	for (int i=1; i<=codef_lines_size; i++) {
 
 	    if (lcmap.get(i) != null && lcmap.get(i).longValue() == 0l) { //Non-covered
@@ -85,6 +87,7 @@ public class GCovBasedCodeRemover
 		    }
 		    if (!full_removal) {
 			rslt_lines.add(codef_lines.get(i-1));
+			preserved_line_nos.add(i);
 			continue;
 		    }
 
@@ -100,11 +103,13 @@ public class GCovBasedCodeRemover
 		    if (start != -1) {
 			for (int k=i; k<start; k++) { //Add lines up to the function-body line
 			    rslt_lines.add(codef_lines.get(k-1));
+			    preserved_line_nos.add(k);
 			}
 
 			//For start line, add content up to "{"
 			String start_line = codef_lines.get(start-1);
 			rslt_lines.add(start_line.substring(0, start_line.indexOf("{")+1));
+			preserved_line_nos.add(start);
 
 			//Add "" for function-body lines
 			for (int k=start+1; k<end; k++) {
@@ -114,6 +119,7 @@ public class GCovBasedCodeRemover
 			//For end line, add content from "}" to line-end
 			String end_line = codef_lines.get(end-1);
 			rslt_lines.add(end_line.substring(end_line.indexOf("}")));
+			preserved_line_nos.add(end);
 
 			//Reset i
 			i = end;
@@ -121,6 +127,7 @@ public class GCovBasedCodeRemover
 		    else {
 			//Wierd, no "{" found. Don't emptify the function body.
 			rslt_lines.add(codef_lines.get(i-1));
+			preserved_line_nos.add(i);
 		    }
 
 		    continue;
@@ -129,6 +136,7 @@ public class GCovBasedCodeRemover
 		//Don't remove compound line
 		if ("compound".equals(spfs_map.get(i))) {
 		    rslt_lines.add(codef_lines.get(i-1));
+		    preserved_line_nos.add(i);
 		    continue;
 		}
 		
@@ -137,6 +145,7 @@ public class GCovBasedCodeRemover
 		//Need to however insert ";" at the end (compiling error otherwise)
 		if ("label".equals(spfs_map.get(i))) {
 		    rslt_lines.add(getSemiColonAugmentedLabelLine(codef_lines.get(i-1)));
+		    preserved_line_nos.add(i);
 		    continue;
 		}
 
@@ -159,6 +168,7 @@ public class GCovBasedCodeRemover
 			}
 			if (!full_removal) {
 			    rslt_lines.add(codef_lines.get(i-1));
+			    preserved_line_nos.add(i);
 			    continue;
 			}
 
@@ -167,10 +177,12 @@ public class GCovBasedCodeRemover
 			    if (k == i) { //Removed code from "{" to line-end
 				String oldline = codef_lines.get(k-1);
 				rslt_lines.add(oldline.substring(0, oldline.indexOf("{")+1));
+				preserved_line_nos.add(k);
 			    } 
 			    else if (k == j) { //Removed code up to "}"
 				String oldline = codef_lines.get(k-1);
 				rslt_lines.add(oldline.substring(oldline.indexOf("}")));
+				preserved_line_nos.add(k);
 			    } 
 			    else { //Removed line
 				rslt_lines.add("");
@@ -180,6 +192,7 @@ public class GCovBasedCodeRemover
 		    }
 		    else {
 			rslt_lines.add(codef_lines.get(i-1));
+			preserved_line_nos.add(i);
 		    }
 		    continue;
 		}
@@ -204,12 +217,14 @@ public class GCovBasedCodeRemover
 		    else {
 			//Do not remove the line
 			rslt_lines.add(codef_lines.get(i-1));
+			preserved_line_nos.add(i);
 		    }
 		}
 
 		else {
 		    //Non-covered line not recorded in line file. Keep it.");
 		    rslt_lines.add(codef_lines.get(i-1));
+		    preserved_line_nos.add(i);
 		}
 	    }
 
@@ -222,13 +237,38 @@ public class GCovBasedCodeRemover
 		    //In such case, compilation error can occur
 		    //if removing the label content but keeping the label line.
 		    rslt_lines.add(getSemiColonAugmentedLabelLine(codef_lines.get(i-1)));
+		    preserved_line_nos.add(i);
 		}
 		else {
 		    rslt_lines.add(codef_lines.get(i-1)); //Add the original line
+		    preserved_line_nos.add(i);
 		}
 	    }
 	}
 
+
+	//Add back possibly missing ending lines for functions and statements having children
+	//In the following example,
+	//5: if (0) {
+	//6:  STMT;
+	//7: };
+	//Line 7 is identified as a statement but is not contained in the coverage result produced by gcov/llvm-cov
+	//We use the code below to add back line 7 since the coverage result includes line 5
+	for (int i=1; i<=codef_lines_size; i++) {
+	    if (preserved_line_nos.contains(i)) {
+		int end = -1;
+		if (ffs_map.get(i) != null) {
+		    end = ffs_map.get(i);
+		}
+		else if (sfs_map.get(i) != null) {
+		    end = sfs_map.get(i);
+		}
+		if (end != -1 && end != i) {
+		    rslt_lines.set(end-1, codef_lines.get(end-1));
+		}
+	    }
+	}
+	
 	//Restore inconsistent functions as its original full version
 	for (Integer sln_key : iflnmap.keySet()) {
 	    int sln = sln_key.intValue();
@@ -293,3 +333,4 @@ public class GCovBasedCodeRemover
 	return newline;
     }
 }
+
