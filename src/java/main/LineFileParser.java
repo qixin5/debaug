@@ -71,6 +71,9 @@ public class LineFileParser
 		if (lmap.get(sl) == null) {
 		    lmap.put(sl, elems[2]);
 		}
+		else {
+		    lmap.put(sl, lmap.get(sl)+","+elems[2]); //A line can have multiple properties associated, for example (1) stmt:6,12,if and (2) stmt:6,12,compound
+		}
 	    }
 	}
 

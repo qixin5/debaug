@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
+import java.util.regex.*;
 import java.io.File;
 import org.apache.commons.io.FileUtils;
 
@@ -69,7 +70,7 @@ public class GCovBasedCodeRemover
 	List<String> rslt_lines = new ArrayList<String>(codef_lines_size+1);
 
 
-	//Either adding the original line or an empty line
+	//Add either the original line or an empty line
 	//For label stmt line, insert ";" at the end (compiling error otherwise)
 	Set<Integer> preserved_line_nos = new HashSet<Integer>();
 	    
@@ -147,7 +148,7 @@ public class GCovBasedCodeRemover
 		}
 
 		//Don't remove compound line
-		if ("compound".equals(spfs_map.get(i))) {
+		if ("compound".equals(spfs_map.get(i))) { //equals, not contains
 		    rslt_lines.add(codef_lines.get(i-1));
 		    preserved_line_nos.add(i);
 		    continue;
@@ -156,7 +157,7 @@ public class GCovBasedCodeRemover
 		//Don't remove label line
 		//(otherwise, we may have missing labels, see gcoverrorshooting-case0)
 		//Need to however insert ";" at the end (compiling error otherwise)
-		if ("label".equals(spfs_map.get(i))) {
+		if ("label".equals(spfs_map.get(i))) { //equals, not contains
 		    rslt_lines.add(getSemiColonAugmentedLabelLine(codef_lines.get(i-1)));
 		    preserved_line_nos.add(i);
 		    continue;
@@ -278,6 +279,7 @@ public class GCovBasedCodeRemover
 	//7: };
 	//Line 7 is identified as a statement but is not contained in the coverage result produced by gcov/llvm-cov
 	//We use the code below to add back line 7 since the coverage result includes line 5
+	//Pattern missing_endline_ptn = Pattern.compile("(.*\\*/)?[;}]*(//.*|/\\*.*)?");
 	for (int i=1; i<=codef_lines_size; i++) {
 	    if (preserved_line_nos.contains(i)) {
 		int end = -1;
@@ -287,8 +289,21 @@ public class GCovBasedCodeRemover
 		else if (sfs_map.get(i) != null) {
 		    end = sfs_map.get(i);
 		}
-		if (end != -1 && end != i) {
-		    if ("".equals(rslt_lines.get(end-1))) {
+		if (end != -1 && end != i && "".equals(rslt_lines.get(end-1)))  {
+
+		    //Ending line is not added back
+		    String ltype = spfs_map.get(i);
+		    //if (ltype != null && (ltype.equals("compound") || ltype.equals("if") || ltype.equals("dowhile") ||
+		    //			  ltype.equals("for") || ltype.equals("while") || ltype.equals("fbcompound") ||
+		    //			  ltype.equals("main"))) {
+		    if (ltype != null && (ltype.contains("compound") || ltype.contains("fbcompound"))) {
+			
+			//String orig_line = codef_lines.get(end-1);
+			//Check if orig_line contains only } and ;
+			//if (missing_endline_ptn.matcher(orig_line).matches()) {
+			//rslt_lines.set(end-1, orig_line);
+			//}
+
 			rslt_lines.set(end-1, codef_lines.get(end-1));
 		    }
 		}
