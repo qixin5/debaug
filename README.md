@@ -50,6 +50,10 @@ export DEBAUG_DIR=[debaug directory]
 
 **Note**: Because a complete build requires building LLVM from source code, it can take a few hours!
 
+#### Using Clang-15
+
+If you want to use clang-15 instead of clang-9, follow the instructions in [for_clang_15/README.md](for_clang_15/README.md).
+
 
 ## Quick Example
 
